@@ -34,14 +34,14 @@ export function Footer() {
           <div>
             <h5 className="font-headline text-lg font-semibold text-primary mb-3">Connect With Us</h5>
             <div className="flex justify-center md:justify-start space-x-4 mb-4">
-              <SocialLink href="https://facebook.com/example" icon={Facebook} label="Facebook" />
-              <SocialLink href="https://wa.me/1234567890" icon={MessageCircle} label="WhatsApp" />
-              <SocialLink href="https://youtube.com/example" icon={Youtube} label="YouTube" />
+              <SocialLink href="https://www.facebook.com/SriLankaChurch" icon={Facebook} label="Facebook" />
+              <SocialLink href="https://whatsapp.com/channel/0029Va9bccOKwqSYDSqARq3P" icon={MessageCircle} label="WhatsApp" />
+              <SocialLink href="https://www.youtube.com/@lankachurch" icon={Youtube} label="YouTube" />
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p className="flex items-center justify-center md:justify-start"><MapPin className="h-4 w-4 mr-2 text-primary/70" />123 Church Street, Colombo, Sri Lanka</p>
-              <p className="flex items-center justify-center md:justify-start"><Phone className="h-4 w-4 mr-2 text-primary/70" />+94 11 234 5678</p>
-              <p className="flex items-center justify-center md:justify-start"><Mail className="h-4 w-4 mr-2 text-primary/70" />info@praiseprayerlanka.org</p>
+              <p className="flex items-center justify-center md:justify-start"><MapPin className="h-4 w-4 mr-2 text-primary/70" />76, Model Town Rd, Moratuwa</p>
+              <p className="flex items-center justify-center md:justify-start"><Phone className="h-4 w-4 mr-2 text-primary/70" />+94714834462</p>
+              <p className="flex items-center justify-center md:justify-start"><Mail className="h-4 w-4 mr-2 text-primary/70" />info@lankachurch.org</p>
             </div>
           </div>
         </div>

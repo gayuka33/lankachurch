@@ -6,15 +6,15 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 const contactDetails = [
-  { icon: MapPin, label: 'Address', value: '123 Church Street, Colombo, Sri Lanka', href: 'https://maps.google.com/?q=123+Church+Street,+Colombo,+Sri+Lanka' },
-  { icon: Phone, label: 'Phone', value: '+94 11 234 5678', href: 'tel:+94112345678' },
-  { icon: Mail, label: 'Email', value: 'info@praiseprayerlanka.org', href: 'mailto:info@praiseprayerlanka.org' },
+  { icon: MapPin, label: 'Address', value: '76, Model Town Rd, Moratuwa', href: 'https://maps.app.goo.gl/QBsdB5o76ixZLW7Q8' },
+  { icon: Phone, label: 'Phone', value: '+94714834462', href: 'tel:+94714834462' },
+  { icon: Mail, label: 'Email', value: 'info@lankachurch.org', href: 'mailto:info@lankachurch.org' },
 ];
 
 const socialLinks = [
-  { icon: Facebook, label: 'Facebook', href: 'https://facebook.com/yourchurchpage' },
-  { icon: Youtube, label: 'YouTube', href: 'https://youtube.com/yourchurchchannel' },
-  { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/94771234567' }, // Example WhatsApp link
+  { icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/SriLankaChurch' },
+  { icon: Youtube, label: 'YouTube', href: 'https://www.youtube.com/@lankachurch' },
+  { icon: MessageCircle, label: 'WhatsApp', href: 'https://whatsapp.com/channel/0029Va9bccOKwqSYDSqARq3P' },
 ];
 
 export default function ContactPage() {
@@ -65,10 +65,10 @@ export default function ContactPage() {
                 <p className="text-muted-foreground">We welcome you to join our services. Find our location below.</p>
                 {/* Placeholder for a map or map link */}
                 <div className="mt-4 h-64 bg-muted rounded-lg flex items-center justify-center border border-dashed">
-                   <p className="text-muted-foreground">Embedded Map Placeholder (e.g., Google Maps iframe)</p>
+                   <p className="text-muted-foreground">Praise Prayer Lanka Church</p>
                 </div>
                  <Button asChild variant="link" className="text-accent mt-2 p-0">
-                    <Link href="https://maps.google.com/?q=123+Church+Street,+Colombo,+Sri+Lanka" target="_blank" rel="noopener noreferrer">
+                    <Link href="https://maps.app.goo.gl/QBsdB5o76ixZLW7Q8" target="_blank" rel="noopener noreferrer">
                         View on Google Maps
                     </Link>
                 </Button>
