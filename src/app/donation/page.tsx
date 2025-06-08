@@ -31,11 +31,10 @@ export default function DonationPage() {
             <CardContent>
               <p className="text-muted-foreground mb-4">You can make a direct deposit or bank transfer to our church account:</p>
               <ul className="space-y-2 text-sm text-foreground list-disc list-inside bg-secondary/30 p-4 rounded-md">
-                <li><strong>Bank Name:</strong> Placeholder Bank PLC</li>
+                <li><strong>Bank Name:</strong> Bank Name</li>
                 <li><strong>Account Name:</strong> Praise Prayer Lanka Church</li>
-                <li><strong>Account Number:</strong> 123-456-7890</li>
-                <li><strong>Branch:</strong> Colombo Main Branch</li>
-                <li><strong>SWIFT Code:</strong> PBPLCXXX (for international transfers)</li>
+                <li><strong>Account Number:</strong> 1234567890</li>
+                <li><strong>Branch:</strong> Bank Branch</li>
               </ul>
               <p className="text-xs text-muted-foreground mt-3">Please mention "Tithe" or "Offering" or specific ministry in the reference if possible.</p>
             </CardContent>
