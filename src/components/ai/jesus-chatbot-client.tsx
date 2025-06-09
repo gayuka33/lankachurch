@@ -1,6 +1,8 @@
+
 "use client";
 
-import { useState, useRef, useEffect, type FormEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent, ChangeEvent } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,8 +15,8 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bot, User, Loader2, Languages } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Bot, User, Loader2, Languages, Paperclip, XCircle } from "lucide-react";
 import { jesusChatbot, type JesusChatbotInput, type JesusChatbotOutput } from "@/ai/flows/jesus-chatbot";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,18 +25,30 @@ interface Message {
   text: string;
   sender: "user" | "ai";
   language?: "Sinhala" | "Tamil" | "English";
+  fileDataUri?: string | null;
+  fileName?: string | null;
+  fileMimeType?: string | null;
 }
+
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_DATA_URI_LENGTH = 4 * 1024 * 1024; // 4MB for Base64 string
 
 export function JesusChatbotClient() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState<"Sinhala" | "Tamil" | "English">("English");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileDataUri, setFileDataUri] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileMimeType, setFileMimeType] = useState<string | null>(null);
+
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     if (scrollAreaRef.current) {
       const scrollableViewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
       if (scrollableViewport) {
@@ -43,22 +57,82 @@ export function JesusChatbotClient() {
     }
   }, [messages]);
 
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast({
+        title: "File too large",
+        description: `Please select a file smaller than ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB.`,
+        variant: "destructive",
+      });
+      clearSelectedFile();
+      return;
+    }
+
+    setSelectedFile(file);
+    setFileName(file.name);
+    setFileMimeType(file.type);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUri = e.target?.result as string;
+      if (dataUri.length > MAX_DATA_URI_LENGTH) {
+        toast({
+          title: "File data too large",
+          description: "The file is too large after encoding. Please choose a smaller file.",
+          variant: "destructive",
+        });
+        clearSelectedFile();
+        return;
+      }
+      setFileDataUri(dataUri);
+    };
+    reader.onerror = () => {
+      toast({ title: "Error reading file", description: "Could not read the selected file.", variant: "destructive" });
+      clearSelectedFile();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+    setFileDataUri(null);
+    setFileName(null);
+    setFileMimeType(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset file input
+    }
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !fileDataUri) || isLoading) return;
 
+    const userMessageText = input.trim();
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: input,
+      text: userMessageText,
       sender: "user",
       language,
+      fileDataUri: fileDataUri,
+      fileName: fileName,
+      fileMimeType: fileMimeType,
     };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    clearSelectedFile(); // Clear file after adding to message
     setIsLoading(true);
 
     try {
-      const chatbotInput: JesusChatbotInput = { message: input, language };
+      const chatbotInput: Omit<JesusChatbotInput, 'isImage'> = { 
+        message: userMessageText, 
+        language,
+        fileDataUri: userMessage.fileDataUri || undefined, // Pass undefined if null
+        fileName: userMessage.fileName || undefined,
+        fileMimeType: userMessage.fileMimeType || undefined,
+      };
       const result: JesusChatbotOutput = await jesusChatbot(chatbotInput);
       
       const aiMessage: Message = {
@@ -75,7 +149,6 @@ export function JesusChatbotClient() {
         description: "Could not get a response. Please try again.",
         variant: "destructive",
       });
-      // Optionally add the error message back to input or as a system message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: "Sorry, I encountered an error. Please try again.",
@@ -88,6 +161,8 @@ export function JesusChatbotClient() {
     }
   };
 
+  const isImageFile = fileMimeType?.startsWith("image/");
+
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-2xl">
       <CardHeader className="text-center">
@@ -96,7 +171,7 @@ export function JesusChatbotClient() {
         </div>
         <CardTitle className="font-headline text-3xl text-primary">Chat with Jesus (AI)</CardTitle>
         <CardDescription>
-          Ask questions or seek guidance. Responses are based on the teachings and character of Jesus as portrayed in the Bible. 
+          Ask questions, seek guidance, or share a file/image. Responses are based on the teachings and character of Jesus.
           Select your preferred language for the conversation.
         </CardDescription>
       </CardHeader>
@@ -120,7 +195,7 @@ export function JesusChatbotClient() {
         <ScrollArea className="h-[400px] w-full border rounded-md p-4 bg-secondary/20" ref={scrollAreaRef}>
           {messages.length === 0 && (
             <p className="text-center text-muted-foreground italic py-4">
-              Start the conversation by typing your message below.
+              Start the conversation by typing your message or attaching a file.
             </p>
           )}
           {messages.map((msg) => (
@@ -131,21 +206,38 @@ export function JesusChatbotClient() {
               }`}
             >
               {msg.sender === "ai" && (
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 self-start">
                   <AvatarFallback className="bg-primary text-primary-foreground"><Bot size={18}/></AvatarFallback>
                 </Avatar>
               )}
               <div
-                className={`max-w-[75%] rounded-lg px-4 py-2 shadow ${
+                className={`max-w-[75%] rounded-lg px-3 py-2 shadow ${
                   msg.sender === "user"
                     ? "bg-primary text-primary-foreground rounded-br-none"
                     : "bg-card text-card-foreground border border-border rounded-bl-none"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                {msg.fileDataUri && msg.fileMimeType?.startsWith("image/") && (
+                  <div className="mb-2">
+                    <Image 
+                      src={msg.fileDataUri} 
+                      alt={msg.fileName || "Uploaded image"} 
+                      width={200} 
+                      height={150}
+                      className="rounded-md object-contain max-h-[150px]" 
+                    />
+                  </div>
+                )}
+                {msg.fileDataUri && !msg.fileMimeType?.startsWith("image/") && msg.fileName && (
+                  <div className="mb-2 p-2 bg-background/50 rounded-md text-sm">
+                    <Paperclip className="h-4 w-4 inline mr-1" />
+                    File: {msg.fileName} ({msg.fileMimeType})
+                  </div>
+                )}
+                {msg.text && <p className="text-sm whitespace-pre-wrap">{msg.text}</p>}
               </div>
               {msg.sender === "user" && (
-                 <Avatar className="h-8 w-8">
+                 <Avatar className="h-8 w-8 self-start">
                    <AvatarFallback className="bg-accent text-accent-foreground"><User size={18}/></AvatarFallback>
                  </Avatar>
               )}
@@ -163,7 +255,24 @@ export function JesusChatbotClient() {
           )}
         </ScrollArea>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col items-start">
+        {fileDataUri && (
+          <div className="mb-2 p-2 border rounded-md w-full bg-secondary/50 flex justify-between items-center">
+            <div>
+              {isImageFile && fileDataUri ? (
+                <Image src={fileDataUri} alt={fileName || "Preview"} width={60} height={45} className="rounded object-cover" />
+              ) : (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Paperclip className="h-4 w-4 mr-2 shrink-0" />
+                  <span className="truncate">{fileName || "Selected file"}</span>
+                </div>
+              )}
+            </div>
+            <Button variant="ghost" size="icon" onClick={clearSelectedFile} aria-label="Clear selected file">
+              <XCircle className="h-5 w-5 text-destructive" />
+            </Button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
           <Input
             type="text"
@@ -174,7 +283,24 @@ export function JesusChatbotClient() {
             disabled={isLoading}
             aria-label="Chat message input"
           />
-          <Button type="submit" disabled={isLoading || !input.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+            accept="image/*,.pdf,.doc,.docx,.txt" // Specify acceptable file types
+          />
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="icon" 
+            onClick={() => fileInputRef.current?.click()} 
+            disabled={isLoading}
+            aria-label="Attach file"
+          >
+            <Paperclip className="h-5 w-5" />
+          </Button>
+          <Button type="submit" disabled={isLoading || (!input.trim() && !fileDataUri)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
           </Button>
         </form>
