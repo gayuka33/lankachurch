@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useState, type ComponentPropsWithoutRef, useEffect } from 'react';
 import { Menu, X, BookOpen, Bot, Church, HomeIcon, Info, Users, ListChecks, GalleryThumbnails, Newspaper, Mail, Gift, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -186,6 +186,7 @@ export function Header() {
             <SheetContent side="right" className="w-[300px] sm:w-[340px] bg-background p-0">
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-4 border-b">
+                  <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
                   <Link href="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
                     <Church className="h-7 w-7 text-primary mr-2" />
                     <span className="font-headline text-lg font-bold text-primary">PPLC</span>
